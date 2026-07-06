@@ -18,6 +18,7 @@ npm run dev
 ```bash
 npm run build
 npm test
+npm run test:e2e
 npm run preview
 ```
 
