@@ -42,16 +42,16 @@ const endpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
 
       const url = `${endpoint.replace(/\/$/, '')}/api/track`;
       const body = JSON.stringify(payload);
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
-        return;
-      }
       fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body,
         keepalive: true,
-      }).catch(() => {});
+      }).catch(() => {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+        }
+      });
     };
 
     window.aiRadarTrack = send;
