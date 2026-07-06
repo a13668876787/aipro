@@ -1,11 +1,13 @@
 name = "ai-radar-pro-analytics"
 main = "src/index.js"
 compatibility_date = "2026-07-06"
+workers_dev = true
+preview_urls = false
 
 [[d1_databases]]
 binding = "DB"
 database_name = "ai-radar-pro-analytics"
-database_id = "replace-with-your-d1-database-id"
+database_id = "b5532dc8-bd7e-4eac-8106-53b49a6d4063"
 
 [vars]
 ALLOWED_ORIGINS = "https://a13668876787.github.io,http://127.0.0.1:4321"

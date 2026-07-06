@@ -35,6 +35,8 @@ npm run preview
 
 当前外部访问地址：`https://a13668876787.github.io/aipro/`。
 
+当前统计后端地址：`https://ai-radar-pro-analytics.a13668876787.workers.dev`。
+
 默认外部访问地址格式：`https://你的用户名.github.io/仓库名/`。
 
 如果仓库名是 `你的用户名.github.io`，把 workflow 里的 `ASTRO_BASE` 改成 `/`。
@@ -106,6 +108,20 @@ npm run worker:deploy
 ```text
 https://ai-radar-pro-analytics.你的账号.workers.dev
 ```
+
+本项目当前 Worker 地址：
+
+```text
+https://ai-radar-pro-analytics.a13668876787.workers.dev
+```
+
+后台密钥保存在本机：
+
+```text
+.local-analytics-secrets.json
+```
+
+这个文件已经加入 `.gitignore`，不会提交到 GitHub。
 
 ### 让 GitHub Pages 接入统计
 
