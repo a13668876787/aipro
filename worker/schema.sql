@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS events (
   session_id TEXT,
   ip_hash TEXT NOT NULL,
   ip_masked TEXT NOT NULL,
+  ip_full TEXT,
   country TEXT,
   region TEXT,
   city TEXT,

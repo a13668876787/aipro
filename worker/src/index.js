@@ -92,8 +92,8 @@ async function track(request, env) {
   await env.DB.prepare(`
     INSERT INTO events (
       id, created_at, day, type, path, title, referrer, visitor_id, session_id,
-      ip_hash, ip_masked, country, region, city, user_agent, device, is_owner, detail
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ip_hash, ip_masked, ip_full, country, region, city, user_agent, device, is_owner, detail
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id,
     now.toISOString(),
@@ -106,6 +106,7 @@ async function track(request, env) {
     String(body.sessionId || '').slice(0, 120),
     ipHash,
     maskIp(ip),
+    ip,
     cf.country || '',
     cf.region || '',
     cf.city || '',
@@ -139,7 +140,7 @@ async function summary(request, env) {
   `).bind(day).first();
 
   const events = await env.DB.prepare(`
-    SELECT created_at AS createdAt, type, path, ip_masked AS ipMasked, country, region, city, device, is_owner AS isOwner
+    SELECT created_at AS createdAt, type, path, ip_masked AS ipMasked, ip_full AS ipFull, country, region, city, device, is_owner AS isOwner
     FROM events
     WHERE day = ?
     ORDER BY created_at DESC

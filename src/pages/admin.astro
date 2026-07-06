@@ -40,7 +40,13 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
       <article class="admin-panel">
         <div class="admin-panel-head">
           <h2>实时访问</h2>
-          <button class="button" data-admin-refresh>刷新</button>
+          <div class="admin-actions compact">
+            <label class="admin-toggle">
+              <input data-show-full-ip type="checkbox" />
+              <span>显示完整 IP</span>
+            </label>
+            <button class="button" data-admin-refresh>刷新</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -73,10 +79,12 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
       const clicksList = document.querySelector('[data-clicks-list]');
       const settingsKey = 'ai-radar-pro-admin-settings';
       const ownerKey = 'ai-radar-pro-owner-token';
+      const fullIpToggle = document.querySelector('[data-show-full-ip]');
 
       const settings = JSON.parse(localStorage.getItem(settingsKey) || '{}');
       endpointInput.value = settings.endpoint || analyticsEndpoint || '';
       keyInput.value = settings.adminKey || '';
+      fullIpToggle.checked = Boolean(settings.showFullIp);
 
       const apiBase = () => endpointInput.value.trim().replace(/\/$/, '');
       const adminKey = () => keyInput.value.trim();
@@ -86,7 +94,7 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
       };
 
       const saveSettings = () => {
-        localStorage.setItem(settingsKey, JSON.stringify({ endpoint: apiBase(), adminKey: adminKey() }));
+        localStorage.setItem(settingsKey, JSON.stringify({ endpoint: apiBase(), adminKey: adminKey(), showFullIp: fullIpToggle.checked }));
       };
 
       const getJson = async (path, options = {}) => {
@@ -115,6 +123,11 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
           : `<p>${empty}</p>`;
       };
 
+      const displayIp = (event) => {
+        if (!fullIpToggle.checked) return event.ipMasked;
+        return event.ipFull || `${event.ipMasked}（历史记录无完整 IP）`;
+      };
+
       const refresh = async () => {
         if (!apiBase() || !adminKey()) {
           setStatus('请先填写 Worker API 地址和后台密钥。');
@@ -133,7 +146,7 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
               <tr>
                 <td>${fmtTime(event.createdAt)}</td>
                 <td><span class="identity ${event.isOwner ? 'owner' : ''}">${event.isOwner ? '站长' : '外人'}</span></td>
-                <td>${event.ipMasked}</td>
+                <td>${displayIp(event)}</td>
                 <td>${[event.country, event.region, event.city].filter(Boolean).join(' / ') || '未知'}</td>
                 <td>${event.path}</td>
                 <td>${event.device}</td>
@@ -166,6 +179,7 @@ const analyticsEndpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
       document.querySelector('[data-admin-save]').addEventListener('click', refresh);
       document.querySelector('[data-admin-refresh]').addEventListener('click', refresh);
       document.querySelector('[data-admin-mark-owner]').addEventListener('click', markOwner);
+      fullIpToggle.addEventListener('change', refresh);
       if (endpointInput.value && keyInput.value) refresh();
     })();
   </script>
