@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import AnalyticsScript from '../components/AnalyticsScript.astro';
 
 const {
   title = 'AI 今日雷达 Pro',
@@ -12,6 +13,7 @@ const nav = [
   ['/tools/', '工具目录'],
   ['/opportunities/', '机会库'],
   ['/library/', '资料库'],
+  ['/admin/', '后台'],
 ];
 ---
 
@@ -44,5 +46,6 @@ const nav = [
         <p>每条机会都必须说明机制、受益者、风险、验证方式和失败点。</p>
       </footer>
     </div>
+    <AnalyticsScript />
   </body>
 </html>

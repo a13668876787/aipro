@@ -1,0 +1,73 @@
+---
+const endpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
+---
+
+<script is:inline define:vars={{ endpoint }}>
+  (() => {
+    if (!endpoint) {
+      document.documentElement.dataset.analytics = 'disabled';
+      return;
+    }
+
+    const visitorKey = 'ai-radar-pro-visitor-id';
+    const ownerKey = 'ai-radar-pro-owner-token';
+    const sessionKey = 'ai-radar-pro-session-id';
+    const now = Date.now();
+
+    const getOrSet = (key, prefix) => {
+      const existing = localStorage.getItem(key);
+      if (existing) return existing;
+      const value = `${prefix}_${crypto.randomUUID ? crypto.randomUUID() : `${now}_${Math.random().toString(16).slice(2)}`}`;
+      localStorage.setItem(key, value);
+      return value;
+    };
+
+    const visitorId = getOrSet(visitorKey, 'visitor');
+    const sessionId = getOrSet(sessionKey, 'session');
+
+    const send = (type, detail = {}) => {
+      const payload = {
+        type,
+        visitorId,
+        sessionId,
+        ownerToken: localStorage.getItem(ownerKey) || '',
+        path: location.pathname,
+        title: document.title,
+        referrer: document.referrer,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        detail,
+      };
+
+      const url = `${endpoint.replace(/\/$/, '')}/api/track`;
+      const body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+        return;
+      }
+      fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body,
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    window.aiRadarTrack = send;
+    send('pageview');
+
+    document.addEventListener('click', (event) => {
+      const target = event.target.closest('a,button');
+      if (!target) return;
+      const label = target.textContent.trim().slice(0, 80);
+      const href = target.href || '';
+      const action = target.dataset.copy ? 'copy_prompt'
+        : target.dataset.save ? 'save_item'
+          : target.dataset.read ? 'read_item'
+            : href ? 'open_link'
+              : 'button';
+      send('click', { action, label, href, id: target.dataset.save || target.dataset.read || '' });
+    });
+  })();
+</script>

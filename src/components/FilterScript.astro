@@ -17,6 +17,7 @@
       else list.push(id);
       save();
       renderState();
+      window.aiRadarTrack?.(index >= 0 ? 'remove_local_state' : 'add_local_state', { id });
     };
 
     const textForCard = (card) => [card.dataset.title, card.dataset.category, card.dataset.type, card.dataset.difficulty, card.dataset.audience, card.dataset.risk].join(' ').toLowerCase();
@@ -62,6 +63,7 @@
       try {
         await navigator.clipboard.writeText(text);
         button.textContent = '已复制';
+        window.aiRadarTrack?.('copy_prompt', { label: button.textContent, text: text.slice(0, 120) });
       } catch (_error) {
         window.prompt('复制这段内容：', text);
       }

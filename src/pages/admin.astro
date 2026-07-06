@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="运营后台 · AI 今日雷达 Pro" description="AI 今日雷达 Pro 的访问统计后台。">
+  <main class="admin-page">
+    <section class="admin-hero">
+      <div>
+        <span class="eyebrow">Private Analytics · Owner Console</span>
+        <h1>运营后台</h1>
+        <p>查看今日访问量、访客 IP、站长本人和外部访客、热门页面与点击行为。统计后端使用 Cloudflare Worker，密钥只保存在你的浏览器和 Worker 环境变量里。</p>
+      </div>
+      <div class="admin-connect">
+        <label>
+          <span>Worker API 地址</span>
+          <input data-admin-endpoint placeholder="https://你的-worker.workers.dev" />
+        </label>
+        <label>
+          <span>后台密钥</span>
+          <input data-admin-key type="password" placeholder="Cloudflare Worker ADMIN_KEY" />
+        </label>
+        <div class="admin-actions">
+          <button class="button primary" data-admin-save>保存并刷新</button>
+          <button class="button" data-admin-mark-owner>把当前设备标记为站长</button>
+        </div>
+        <p data-admin-status>未连接统计后端。</p>
+      </div>
+    </section>
+
+    <section class="admin-grid">
+      <article class="admin-stat"><span>今日 PV</span><strong data-metric="pageviews">--</strong></article>
+      <article class="admin-stat"><span>今日 UV</span><strong data-metric="visitors">--</strong></article>
+      <article class="admin-stat"><span>外部访客</span><strong data-metric="outsiders">--</strong></article>
+      <article class="admin-stat"><span>站长访问</span><strong data-metric="ownerVisits">--</strong></article>
+    </section>
+
+    <section class="admin-layout">
+      <article class="admin-panel">
+        <div class="admin-panel-head">
+          <h2>实时访问</h2>
+          <button class="button" data-admin-refresh>刷新</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>时间</th><th>身份</th><th>IP</th><th>地区</th><th>页面</th><th>设备</th></tr>
+            </thead>
+            <tbody data-events-table>
+              <tr><td colspan="6">等待连接。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <aside class="admin-panel">
+        <h2>热门页面</h2>
+        <div class="rank-list" data-pages-list></div>
+        <h2>点击行为</h2>
+        <div class="rank-list" data-clicks-list></div>
+      </aside>
+    </section>
+  </main>
+
+  <script is:inline>
+    (() => {
+      const endpointInput = document.querySelector('[data-admin-endpoint]');
+      const keyInput = document.querySelector('[data-admin-key]');
+      const status = document.querySelector('[data-admin-status]');
+      const table = document.querySelector('[data-events-table]');
+      const pagesList = document.querySelector('[data-pages-list]');
+      const clicksList = document.querySelector('[data-clicks-list]');
+      const settingsKey = 'ai-radar-pro-admin-settings';
+      const ownerKey = 'ai-radar-pro-owner-token';
+
+      const settings = JSON.parse(localStorage.getItem(settingsKey) || '{}');
+      endpointInput.value = settings.endpoint || '';
+      keyInput.value = settings.adminKey || '';
+
+      const apiBase = () => endpointInput.value.trim().replace(/\/$/, '');
+      const adminKey = () => keyInput.value.trim();
+      const setStatus = (text, ok = false) => {
+        status.textContent = text;
+        status.classList.toggle('is-ok', ok);
+      };
+
+      const saveSettings = () => {
+        localStorage.setItem(settingsKey, JSON.stringify({ endpoint: apiBase(), adminKey: adminKey() }));
+      };
+
+      const getJson = async (path, options = {}) => {
+        const response = await fetch(`${apiBase()}${path}`, {
+          ...options,
+          headers: {
+            'content-type': 'application/json',
+            'x-admin-key': adminKey(),
+            ...(options.headers || {}),
+          },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      };
+
+      const fmtTime = (value) => new Intl.DateTimeFormat('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Shanghai',
+      }).format(new Date(value));
+
+      const renderRank = (node, rows, empty) => {
+        node.innerHTML = rows?.length
+          ? rows.map((row) => `<article><strong>${row.label}</strong><span>${row.count}</span></article>`).join('')
+          : `<p>${empty}</p>`;
+      };
+
+      const refresh = async () => {
+        if (!apiBase() || !adminKey()) {
+          setStatus('请先填写 Worker API 地址和后台密钥。');
+          return;
+        }
+        saveSettings();
+        setStatus('正在读取后台数据...');
+        try {
+          const data = await getJson('/api/admin/summary');
+          document.querySelector('[data-metric="pageviews"]').textContent = data.metrics.pageviews;
+          document.querySelector('[data-metric="visitors"]').textContent = data.metrics.visitors;
+          document.querySelector('[data-metric="outsiders"]').textContent = data.metrics.outsiders;
+          document.querySelector('[data-metric="ownerVisits"]').textContent = data.metrics.ownerVisits;
+          table.innerHTML = data.events.length
+            ? data.events.map((event) => `
+              <tr>
+                <td>${fmtTime(event.createdAt)}</td>
+                <td><span class="identity ${event.isOwner ? 'owner' : ''}">${event.isOwner ? '站长' : '外人'}</span></td>
+                <td>${event.ipMasked}</td>
+                <td>${[event.country, event.region, event.city].filter(Boolean).join(' / ') || '未知'}</td>
+                <td>${event.path}</td>
+                <td>${event.device}</td>
+              </tr>
+            `).join('')
+            : '<tr><td colspan="6">今天还没有访问记录。</td></tr>';
+          renderRank(pagesList, data.pages, '暂无页面数据。');
+          renderRank(clicksList, data.clicks, '暂无点击数据。');
+          setStatus(`已连接。最后刷新：${new Date().toLocaleTimeString('zh-CN')}`, true);
+        } catch (error) {
+          setStatus(`读取失败：${error.message}。请检查 Worker 地址、ADMIN_KEY 和 D1 数据库。`);
+        }
+      };
+
+      const markOwner = async () => {
+        if (!apiBase() || !adminKey()) {
+          setStatus('请先填写 Worker API 地址和后台密钥。');
+          return;
+        }
+        saveSettings();
+        try {
+          const data = await getJson('/api/admin/owner', { method: 'POST', body: '{}' });
+          localStorage.setItem(ownerKey, data.ownerToken);
+          setStatus('当前浏览器已标记为站长设备。之后你的访问会归类为“站长”。', true);
+        } catch (error) {
+          setStatus(`标记失败：${error.message}`);
+        }
+      };
+
+      document.querySelector('[data-admin-save]').addEventListener('click', refresh);
+      document.querySelector('[data-admin-refresh]').addEventListener('click', refresh);
+      document.querySelector('[data-admin-mark-owner]').addEventListener('click', markOwner);
+      if (endpointInput.value && keyInput.value) refresh();
+    })();
+  </script>
+</BaseLayout>

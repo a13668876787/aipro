@@ -54,6 +54,29 @@ async function runViewport(browser, viewport) {
   return { viewport: viewport.name, visible, savedCount, pageWidth };
 }
 
+async function runAdminCheck(browser) {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+
+  await page.goto(`${url}admin/`, { waitUntil: 'domcontentloaded' });
+  const title = await page.locator('h1').first().innerText();
+  const endpointInput = await page.locator('[data-admin-endpoint]').count();
+  const keyInput = await page.locator('[data-admin-key]').count();
+  const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  await page.close();
+
+  if (!title.includes('运营后台')) throw new Error(`admin: unexpected title ${title}`);
+  if (endpointInput !== 1 || keyInput !== 1) throw new Error('admin: connection form missing');
+  if (pageWidth > 1280) throw new Error(`admin: horizontal overflow ${pageWidth} > 1280`);
+  if (errors.length) throw new Error(`admin: browser errors: ${errors.join('; ')}`);
+
+  return { viewport: 'admin', endpointInput, keyInput, pageWidth };
+}
+
 let preview;
 try {
   preview = startPreview();
@@ -66,6 +89,7 @@ try {
   ]) {
     results.push(await runViewport(browser, viewport));
   }
+  results.push(await runAdminCheck(browser));
   await browser.close();
   console.log(JSON.stringify(results, null, 2));
 } finally {
