@@ -39,6 +39,12 @@ const hashIp = async (ip, salt) => {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 };
 
+const hasOwnerIp = (env, ipHash) => (env.OWNER_IP_HASHES || '')
+  .split(',')
+  .map((item) => item.trim())
+  .filter(Boolean)
+  .includes(ipHash);
+
 const parseDevice = (ua = '') => {
   const lower = ua.toLowerCase();
   const os = lower.includes('iphone') ? 'iPhone'
@@ -77,9 +83,10 @@ async function track(request, env) {
   const body = await readBody(request);
   const now = new Date();
   const ip = request.headers.get('cf-connecting-ip') || '';
+  const ipHash = await hashIp(ip, env.IP_HASH_SALT);
   const cf = request.cf || {};
   const ua = request.headers.get('user-agent') || '';
-  const isOwner = Boolean(env.OWNER_TOKEN && body.ownerToken === env.OWNER_TOKEN);
+  const isOwner = Boolean((env.OWNER_TOKEN && body.ownerToken === env.OWNER_TOKEN) || hasOwnerIp(env, ipHash));
   const id = crypto.randomUUID();
 
   await env.DB.prepare(`
@@ -97,7 +104,7 @@ async function track(request, env) {
     String(body.referrer || '').slice(0, 500),
     String(body.visitorId || '').slice(0, 120),
     String(body.sessionId || '').slice(0, 120),
-    await hashIp(ip, env.IP_HASH_SALT),
+    ipHash,
     maskIp(ip),
     cf.country || '',
     cf.region || '',

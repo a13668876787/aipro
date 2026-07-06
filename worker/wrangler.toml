@@ -11,3 +11,4 @@ database_id = "b5532dc8-bd7e-4eac-8106-53b49a6d4063"
 
 [vars]
 ALLOWED_ORIGINS = "https://a13668876787.github.io,http://127.0.0.1:4321"
+OWNER_IP_HASHES = "04225cc924bbdefdb09ee9f23864a152b14edf7a04941e3fe22ccfc7bc224b71"
