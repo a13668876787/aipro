@@ -35,7 +35,7 @@ jobs:
         run: npm run build
         env:
           ASTRO_SITE: https://${{ github.repository_owner }}.github.io
-          ASTRO_BASE: /${{ github.event.repository.name }}
+          ASTRO_BASE: /${{ github.event.repository.name }}/
 
       - name: Test
         run: npm test
