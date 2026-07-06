@@ -33,6 +33,8 @@ npm run preview
 
 推到 GitHub 后，在仓库开启 `Settings -> Pages -> Build and deployment -> GitHub Actions`。
 
-默认外部访问地址：`https://你的用户名.github.io/仓库名/`。
+当前外部访问地址：`https://a13668876787.github.io/aipro/`。
+
+默认外部访问地址格式：`https://你的用户名.github.io/仓库名/`。
 
 如果仓库名是 `你的用户名.github.io`，把 workflow 里的 `ASTRO_BASE` 改成 `/`。
