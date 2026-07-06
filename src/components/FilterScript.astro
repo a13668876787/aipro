@@ -1,0 +1,93 @@
+<script is:inline>
+  (() => {
+    const stateKey = 'ai-radar-pro-state';
+    const state = JSON.parse(localStorage.getItem(stateKey) || '{"saved":[],"read":[]}');
+    const save = () => localStorage.setItem(stateKey, JSON.stringify(state));
+    const cards = [...document.querySelectorAll('[data-card]')];
+    const search = document.querySelector('[data-search-input]');
+    const savedList = document.querySelector('[data-saved-list]');
+    const count = document.querySelector('[data-result-count]');
+    let activeCategory = '全部';
+    let activeDifficulty = '全部';
+    let activeType = '全部';
+
+    const uniquePush = (list, id) => {
+      const index = list.indexOf(id);
+      if (index >= 0) list.splice(index, 1);
+      else list.push(id);
+      save();
+      renderState();
+    };
+
+    const textForCard = (card) => [card.dataset.title, card.dataset.category, card.dataset.type, card.dataset.difficulty, card.dataset.audience, card.dataset.risk].join(' ').toLowerCase();
+
+    const applyFilters = () => {
+      const q = (search?.value || '').trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((card) => {
+        const okCategory = activeCategory === '全部' || card.dataset.category === activeCategory;
+        const okDifficulty = activeDifficulty === '全部' || card.dataset.difficulty === activeDifficulty;
+        const okType = activeType === '全部' || card.dataset.type === activeType;
+        const okSearch = !q || textForCard(card).includes(q);
+        card.hidden = !(okCategory && okDifficulty && okType && okSearch);
+        if (!card.hidden) visible += 1;
+      });
+      if (count) count.textContent = `显示 ${visible} 条`;
+    };
+
+    const renderState = () => {
+      cards.forEach((card) => {
+        card.classList.toggle('is-saved', state.saved.includes(card.dataset.id));
+        card.classList.toggle('is-read', state.read.includes(card.dataset.id));
+      });
+      document.querySelectorAll('[data-save]').forEach((button) => {
+        const pressed = state.saved.includes(button.dataset.save);
+        button.textContent = pressed ? '已收藏' : '收藏';
+        button.setAttribute('aria-pressed', String(pressed));
+      });
+      document.querySelectorAll('[data-read]').forEach((button) => {
+        const pressed = state.read.includes(button.dataset.read);
+        button.textContent = pressed ? '已读' : '标为已读';
+        button.setAttribute('aria-pressed', String(pressed));
+      });
+      if (savedList) {
+        const savedCards = state.saved.map((id) => cards.find((card) => card.dataset.id === id)).filter(Boolean);
+        savedList.innerHTML = savedCards.length
+          ? savedCards.map((card) => `<article><strong>${card.dataset.title}</strong><span>${card.dataset.type || card.dataset.category}</span></article>`).join('')
+          : '<p>还没有收藏。看到值得验证的工具或机会，先放进选题池。</p>';
+      }
+    };
+
+    const copyText = async (text, button) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = '已复制';
+      } catch (_error) {
+        window.prompt('复制这段内容：', text);
+      }
+      setTimeout(renderState, 1000);
+    };
+
+    document.querySelectorAll('[data-filter-category]').forEach((button) => button.addEventListener('click', () => {
+      activeCategory = button.dataset.filterCategory;
+      document.querySelectorAll('[data-filter-category]').forEach((b) => b.classList.toggle('active', b === button));
+      applyFilters();
+    }));
+    document.querySelectorAll('[data-filter-difficulty]').forEach((button) => button.addEventListener('click', () => {
+      activeDifficulty = button.dataset.filterDifficulty;
+      document.querySelectorAll('[data-filter-difficulty]').forEach((b) => b.classList.toggle('active', b === button));
+      applyFilters();
+    }));
+    document.querySelectorAll('[data-filter-type]').forEach((button) => button.addEventListener('click', () => {
+      activeType = button.dataset.filterType;
+      document.querySelectorAll('[data-filter-type]').forEach((b) => b.classList.toggle('active', b === button));
+      applyFilters();
+    }));
+    document.querySelectorAll('[data-save]').forEach((button) => button.addEventListener('click', () => uniquePush(state.saved, button.dataset.save)));
+    document.querySelectorAll('[data-read]').forEach((button) => button.addEventListener('click', () => uniquePush(state.read, button.dataset.read)));
+    document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', () => copyText(button.dataset.copy, button)));
+    search?.addEventListener('input', applyFilters);
+    renderState();
+    applyFilters();
+  })();
+</script>

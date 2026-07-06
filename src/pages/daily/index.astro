@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterScript from '../../components/FilterScript.astro';
+import { formatDate } from '../../lib/content';
+
+const posts = (await getCollection('daily')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const categories = ['全部', ...new Set(posts.map((post) => post.data.category))];
+---
+
+<BaseLayout title="每日 AI 资讯 · AI 今日雷达 Pro">
+  <main>
+    <section class="section-head">
+      <div>
+        <span class="section-kicker">Daily Archive</span>
+        <h2>每日 AI 资讯归档</h2>
+      </div>
+      <p>每条资讯都必须带来源、行动建议、风险提醒和对抗式审查。</p>
+    </section>
+    <section class="filters">
+      <input data-search-input type="search" placeholder="搜索每日资讯、分类、风险..." />
+      <div class="filter-group">
+        {categories.map((category, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-category={category}>{category}</button>)}
+      </div>
+      <span data-result-count>显示 {posts.length} 条</span>
+    </section>
+    <section class="content-grid">
+      {posts.map((post) => (
+        <article class="content-card" data-card data-id={post.id} data-title={post.data.title} data-category={post.data.category} data-audience={post.data.audience} data-risk={post.data.risk}>
+          <div class="tag-row"><span class="tag">{post.data.category}</span><span class="tag warn">{post.data.impact}影响</span></div>
+          <h3>{post.data.title}</h3>
+          <p>{post.data.summary}</p>
+          <dl>
+            <div><dt>日期</dt><dd>{formatDate(post.data.date)}</dd></div>
+            <div><dt>今天能做</dt><dd>{post.data.action}</dd></div>
+          </dl>
+          <div class="card-actions">
+            <a class="primary" href={`${import.meta.env.BASE_URL}daily/${post.id}/`}>详情</a>
+            <a href={post.data.sourceUrl} target="_blank" rel="noopener">来源</a>
+            <button data-save={post.id}>收藏</button>
+            <button data-read={post.id}>标为已读</button>
+          </div>
+        </article>
+      ))}
+    </section>
+    <section class="saved-panel">
+      <h2>我的资讯池</h2>
+      <div class="saved-list" data-saved-list></div>
+    </section>
+  </main>
+  <FilterScript />
+</BaseLayout>

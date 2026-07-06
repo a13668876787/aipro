@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterScript from '../../components/FilterScript.astro';
+
+const opportunities = await getCollection('opportunities');
+const types = ['全部', ...new Set(opportunities.map((item) => item.data.type))];
+const difficulties = ['全部', ...new Set(opportunities.map((item) => item.data.difficulty))];
+---
+
+<BaseLayout title="AI 赚钱机会库 · AI 今日雷达 Pro">
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Opportunity Library · 不承诺收益</span>
+        <h1>赚钱机会先过审查，再谈执行</h1>
+        <p>每个机会必须讲清真实机制、谁受益、你承担什么风险、如何验证、最可能失败在哪里。适合小白先做 7 天验证，不适合上来梭哈。</p>
+      </div>
+      <figure class="hero-media">
+        <img src={`${import.meta.env.BASE_URL}assets/opportunities-cover.png`} alt="AI 赚钱机会库封面" />
+        <figcaption>机会库 · 7 天验证 · 失败点</figcaption>
+      </figure>
+    </section>
+    <section class="filters">
+      <input data-search-input type="search" placeholder="搜索机会类型、适合人群、风险、变现路径..." />
+      <div class="filter-group">
+        {types.map((type, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-type={type}>{type}</button>)}
+      </div>
+      <div class="filter-group">
+        {difficulties.map((difficulty, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-difficulty={difficulty}>{difficulty}</button>)}
+      </div>
+      <span data-result-count>显示 {opportunities.length} 条</span>
+    </section>
+    <section class="content-grid">
+      {opportunities.map((item) => (
+        <article class="content-card" data-card data-id={item.id} data-title={item.data.title} data-type={item.data.type} data-difficulty={item.data.difficulty} data-audience={item.data.audience} data-risk={item.data.review.userRisk}>
+          <div class="tag-row"><span class="tag">{item.data.type}</span><span class="tag warn">{item.data.difficulty}</span></div>
+          <h3>{item.data.title}</h3>
+          <p>{item.data.monetizationPath}</p>
+          <div class="review-grid">
+            <article><strong>机制</strong><p>{item.data.review.mechanism}</p></article>
+            <article><strong>失败点</strong><p>{item.data.review.failureMode}</p></article>
+          </div>
+          <div class="card-actions">
+            <a class="primary" href={`${import.meta.env.BASE_URL}opportunities/${item.id}/`}>详情</a>
+            <button data-save={item.id}>收藏</button>
+            <button data-read={item.id}>标为已读</button>
+            <button data-copy={`请把这个 AI 机会改成 60 秒短视频选题：${item.data.title}。变现路径：${item.data.monetizationPath}。风险：${item.data.review.userRisk}。输出开头、口播、CTA 和对抗式审查。`}>复制选题</button>
+          </div>
+        </article>
+      ))}
+    </section>
+    <section class="saved-panel">
+      <span class="section-kicker">Local Opportunity Pool</span>
+      <h2>我的机会池</h2>
+      <div class="saved-list" data-saved-list></div>
+    </section>
+  </main>
+  <FilterScript />
+</BaseLayout>

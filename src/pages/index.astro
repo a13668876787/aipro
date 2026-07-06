@@ -1,17 +1,137 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FilterScript from '../components/FilterScript.astro';
+import { allTools, formatDate, toJson } from '../lib/content';
 
+const daily = (await getCollection('daily')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const opportunities = await getCollection('opportunities');
+const library = await getCollection('library');
+const latest = daily[0];
+const topTools = allTools.slice(0, 6);
+const copyPrompt = `请把“AI 今日雷达 Pro”的今日信号改成 60 秒短视频：开头3秒、正文3点、风险提醒、评论区CTA。今日主题：${latest.data.title}`;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="AI 今日雷达 Pro · 资讯、工具、机会库">
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">第一性原理 · 对抗式审查 · 今日更新</span>
+        <h1>把 AI 热点变成可验证的工具、内容和生意线索</h1>
+        <p>不是搬运新闻，而是每天判断：真实机制是什么、谁受益、我承担什么风险、能否独立验证、哪里可能被夸大。</p>
+        <div class="hero-actions">
+          <a class="button primary" href={`${import.meta.env.BASE_URL}tools/`}>看工具目录</a>
+          <a class="button" href={`${import.meta.env.BASE_URL}opportunities/`}>看赚钱机会库</a>
+          <button class="button" data-copy={copyPrompt}>复制今日短视频提示词</button>
+        </div>
+      </div>
+      <figure class="hero-media">
+        <img src={`${import.meta.env.BASE_URL}assets/hero-radar.png`} alt="AI 今日雷达 Pro 主视觉" />
+        <figcaption>AI 资讯 · 工具目录 · 机会验证库</figcaption>
+      </figure>
+    </section>
+
+    <section class="stats" aria-label="站点状态">
+      <article class="stat"><strong>{daily.length}</strong><span>条今日信号</span></article>
+      <article class="stat"><strong>{allTools.length}</strong><span>个 AI 工具</span></article>
+      <article class="stat"><strong>{opportunities.length}</strong><span>个机会模板</span></article>
+      <article class="stat"><strong>{library.length}</strong><span>篇资料库</span></article>
+    </section>
+
+    <section class="section-head">
+      <div>
+        <span class="section-kicker">Today Radar</span>
+        <h2>今日最值得抓的 AI 信号</h2>
+      </div>
+      <p>每条信号都绑定行动建议和风险提醒，适合直接变成短视频、选题池或服务验证。</p>
+    </section>
+    <section class="grid-2">
+      <article class="feature-card">
+        <span class="tag warn">{latest.data.impact}影响</span>
+        <h2>{latest.data.title}</h2>
+        <p>{latest.data.summary}</p>
+        <dl>
+          <div><dt>今天能做</dt><dd>{latest.data.action}</dd></div>
+          <div><dt>风险提醒</dt><dd>{latest.data.risk}</dd></div>
+        </dl>
+        <div class="card-actions">
+          <a class="primary" href={`${import.meta.env.BASE_URL}daily/${latest.id}/`}>打开详情</a>
+          <a href={latest.data.sourceUrl} target="_blank" rel="noopener">来源</a>
+        </div>
+      </article>
+      <div class="grid-2">
+        {daily.slice(1, 5).map((item) => (
+          <article class="mini-card">
+            <span class="tag">{item.data.category}</span>
+            <h3>{item.data.title}</h3>
+            <p>{item.data.review.mechanism}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-head">
+      <div>
+        <span class="section-kicker">Opportunity Engine</span>
+        <h2>工具、机会、资料一体化</h2>
+      </div>
+      <p>首页负责吸引人，工具目录负责留住人，机会库负责转化人，资料库负责长期积累。</p>
+    </section>
+    <section class="grid-3">
+      <article class="panel">
+        <div class="cover"><img src={`${import.meta.env.BASE_URL}assets/tools-cover.png`} alt="AI 工具目录" /><span>Tools</span></div>
+        <h3>AI 工具目录</h3>
+        <p>按用途、价格、难度、适合人群和变现方向筛选。不是推荐榜，而是工具采用审查。</p>
+        <a class="button primary" href={`${import.meta.env.BASE_URL}tools/`}>进入工具目录</a>
+      </article>
+      <article class="panel">
+        <div class="cover"><img src={`${import.meta.env.BASE_URL}assets/opportunities-cover.png`} alt="AI 赚钱机会库" /><span>Opportunities</span></div>
+        <h3>赚钱机会库</h3>
+        <p>每个机会都有 7 天验证步骤、失败点、受益者和风险，不写确定收益。</p>
+        <a class="button primary" href={`${import.meta.env.BASE_URL}opportunities/`}>进入机会库</a>
+      </article>
+      <article class="panel">
+        <h3>第一性原理资料库</h3>
+        <p>沉淀方法论、工具风险清单、内容转服务路径和静态站打法。</p>
+        <div class="tag-row">
+          {library.map((item) => <span class="tag">{item.data.pillar}</span>)}
+        </div>
+        <a class="button primary" href={`${import.meta.env.BASE_URL}library/`}>进入资料库</a>
+      </article>
+    </section>
+
+    <section class="filters">
+      <input data-search-input type="search" placeholder="搜索首页精选工具：ChatGPT、编程、自动化、短视频..." />
+      <div class="filter-group">
+        <button class="filter-chip active" data-filter-category="全部">全部</button>
+        {[...new Set(topTools.map((tool) => tool.category))].map((category) => <button class="filter-chip" data-filter-category={category}>{category}</button>)}
+      </div>
+      <span data-result-count>显示 {topTools.length} 条</span>
+    </section>
+    <section class="content-grid">
+      {topTools.map((tool) => (
+        <article class="content-card" data-card data-id={tool.id} data-title={tool.name} data-category={tool.category} data-difficulty={tool.difficulty} data-audience={tool.audience} data-risk={tool.risk}>
+          <span class="tag">{tool.category}</span>
+          <h3>{tool.name}</h3>
+          <p>{tool.useCase}</p>
+          <dl>
+            <div><dt>变现用途</dt><dd>{tool.monetization}</dd></div>
+            <div><dt>风险</dt><dd>{tool.risk}</dd></div>
+          </dl>
+          <div class="card-actions">
+            <a class="primary" href={tool.url} target="_blank" rel="noopener">官网</a>
+            <button data-save={tool.id}>收藏</button>
+            <button data-read={tool.id}>标为已读</button>
+          </div>
+        </article>
+      ))}
+    </section>
+    <section class="saved-panel">
+      <span class="section-kicker">Local Topic Pool</span>
+      <h2>我的选题池</h2>
+      <div class="saved-list" data-saved-list></div>
+    </section>
+  </main>
+  <script type="application/json" id="radar-data" set:html={toJson({ latest: latest.data.title, date: formatDate(latest.data.date) })} />
+  <FilterScript />
+</BaseLayout>

@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('daily');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} · 每日 AI 资讯`}>
+  <article class="article">
+    <span class="eyebrow">{formatDate(post.data.date)} · {post.data.category} · {post.data.impact}影响</span>
+    <h1>{post.data.title}</h1>
+    <p>{post.data.summary}</p>
+    <section class="review-grid">
+      <article><strong>真实机制</strong><p>{post.data.review.mechanism}</p></article>
+      <article><strong>谁受益</strong><p>{post.data.review.whoBenefits}</p></article>
+      <article><strong>你承担的风险</strong><p>{post.data.review.userRisk}</p></article>
+      <article><strong>可验证证据</strong><p>{post.data.review.verification}</p></article>
+      <article><strong>失败点</strong><p>{post.data.review.failureMode}</p></article>
+      <article><strong>今天能做</strong><p>{post.data.action}</p></article>
+    </section>
+    <p><a class="button primary" href={post.data.sourceUrl} target="_blank" rel="noopener">打开来源：{post.data.sourceName}</a></p>
+    <Content />
+  </article>
+</BaseLayout>

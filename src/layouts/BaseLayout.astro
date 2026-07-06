@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+
+const {
+  title = 'AI 今日雷达 Pro',
+  description = '漂亮公开的 AI 今日资讯站、工具目录、赚钱机会库和资料库。',
+} = Astro.props;
+
+const nav = [
+  ['/', '今日雷达'],
+  ['/daily/', '每日资讯'],
+  ['/tools/', '工具目录'],
+  ['/opportunities/', '机会库'],
+  ['/library/', '资料库'],
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href={`${import.meta.env.BASE_URL}`}>
+          <span>AI</span>
+          <strong>今日雷达 Pro</strong>
+        </a>
+        <nav aria-label="主导航">
+          {nav.map(([href, label]) => (
+            <a href={`${import.meta.env.BASE_URL}${href.replace(/^\//, '')}`}>{label}</a>
+          ))}
+        </nav>
+      </header>
+      <slot />
+      <footer class="footer">
+        <p>第一性原理 · 对抗式审查 · 人工精选 · 不承诺收益</p>
+        <p>每条机会都必须说明机制、受益者、风险、验证方式和失败点。</p>
+      </footer>
+    </div>
+  </body>
+</html>

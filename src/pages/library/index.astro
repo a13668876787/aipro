@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterScript from '../../components/FilterScript.astro';
+import { formatDate } from '../../lib/content';
+
+const posts = (await getCollection('library')).sort((a, b) => b.data.updated.valueOf() - a.data.updated.valueOf());
+const pillars = ['全部', ...new Set(posts.map((post) => post.data.pillar))];
+---
+
+<BaseLayout title="资料库 · AI 今日雷达 Pro">
+  <main>
+    <section class="section-head">
+      <div>
+        <span class="section-kicker">Library</span>
+        <h2>第一性原理资料库</h2>
+      </div>
+      <p>这里沉淀可重复使用的方法论、风险清单和执行 SOP。</p>
+    </section>
+    <section class="filters">
+      <input data-search-input type="search" placeholder="搜索资料、方法论、风险清单..." />
+      <div class="filter-group">
+        {pillars.map((pillar, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-category={pillar}>{pillar}</button>)}
+      </div>
+      <span data-result-count>显示 {posts.length} 条</span>
+    </section>
+    <section class="content-grid">
+      {posts.map((post) => (
+        <article class="content-card" data-card data-id={post.id} data-title={post.data.title} data-category={post.data.pillar} data-audience={post.data.audience} data-risk={post.data.summary}>
+          <span class="tag">{post.data.pillar}</span>
+          <h3>{post.data.title}</h3>
+          <p>{post.data.summary}</p>
+          <dl>
+            <div><dt>适合谁</dt><dd>{post.data.audience}</dd></div>
+            <div><dt>更新</dt><dd>{formatDate(post.data.updated)}</dd></div>
+          </dl>
+          <div class="card-actions">
+            <a class="primary" href={`${import.meta.env.BASE_URL}library/${post.id}/`}>阅读</a>
+            <button data-save={post.id}>收藏</button>
+            <button data-read={post.id}>标为已读</button>
+          </div>
+        </article>
+      ))}
+    </section>
+    <section class="saved-panel">
+      <h2>我的资料池</h2>
+      <div class="saved-list" data-saved-list></div>
+    </section>
+  </main>
+  <FilterScript />
+</BaseLayout>

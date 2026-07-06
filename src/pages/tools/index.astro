@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterScript from '../../components/FilterScript.astro';
+import { allTools } from '../../lib/content';
+
+const categories = ['全部', ...new Set(allTools.map((tool) => tool.category))];
+const difficulties = ['全部', ...new Set(allTools.map((tool) => tool.difficulty))];
+---
+
+<BaseLayout title="AI 工具目录 · AI 今日雷达 Pro">
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Tools Directory · 工具采用审查</span>
+        <h1>AI 工具不是越多越好，而是越能交付越好</h1>
+        <p>这里按用途、难度、价格、适合人群和风险筛选工具。每个工具都要能回答：它解决什么流程，能否变现，权限风险在哪里。</p>
+      </div>
+      <figure class="hero-media">
+        <img src={`${import.meta.env.BASE_URL}assets/tools-cover.png`} alt="AI 工具目录封面" />
+        <figcaption>工具目录 · 变现用途 · 权限风险</figcaption>
+      </figure>
+    </section>
+    <section class="filters">
+      <input data-search-input type="search" placeholder="搜索工具、用途、受众、风险..." />
+      <div class="filter-group">
+        {categories.map((category, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-category={category}>{category}</button>)}
+      </div>
+      <div class="filter-group">
+        {difficulties.map((difficulty, index) => <button class={`filter-chip ${index === 0 ? 'active' : ''}`} data-filter-difficulty={difficulty}>{difficulty}</button>)}
+      </div>
+      <span data-result-count>显示 {allTools.length} 条</span>
+    </section>
+    <section class="content-grid">
+      {allTools.map((tool) => (
+        <article class="content-card" data-card data-id={tool.id} data-title={tool.name} data-category={tool.category} data-difficulty={tool.difficulty} data-audience={tool.audience} data-risk={tool.risk}>
+          <div class="tag-row"><span class="tag">{tool.category}</span><span class="tag warn">{tool.difficulty}</span></div>
+          <h3>{tool.name}</h3>
+          <p>{tool.useCase}</p>
+          <dl>
+            <div><dt>适合谁</dt><dd>{tool.audience}</dd></div>
+            <div><dt>变现用途</dt><dd>{tool.monetization}</dd></div>
+            <div><dt>替代品</dt><dd>{tool.alternatives.join(' / ')}</dd></div>
+            <div><dt>风险</dt><dd>{tool.risk}</dd></div>
+          </dl>
+          <div class="card-actions">
+            <a class="primary" href={tool.url} target="_blank" rel="noopener">官网</a>
+            <button data-save={tool.id}>收藏</button>
+            <button data-read={tool.id}>标为已读</button>
+            <button data-copy={`请帮我评估 ${tool.name} 是否适合做 AI 变现工具。用途：${tool.useCase}。变现方向：${tool.monetization}。风险：${tool.risk}。请按第一性原理和对抗式审查输出。`}>复制审查提示词</button>
+          </div>
+        </article>
+      ))}
+    </section>
+    <section class="saved-panel">
+      <span class="section-kicker">Local Tool Pool</span>
+      <h2>我的工具池</h2>
+      <div class="saved-list" data-saved-list></div>
+    </section>
+  </main>
+  <FilterScript />
+</BaseLayout>

@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('library');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} · 资料库`}>
+  <article class="article">
+    <span class="eyebrow">{post.data.pillar} · {formatDate(post.data.updated)}</span>
+    <h1>{post.data.title}</h1>
+    <p>{post.data.summary}</p>
+    <Content />
+  </article>
+</BaseLayout>

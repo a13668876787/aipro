@@ -1,43 +1,37 @@
-# Astro Starter Kit: Minimal
+# AI 今日雷达 Pro
 
-```sh
-npm create astro@latest -- --template minimal
+漂亮公开的 AI 今日资讯站 + AI 工具目录 + 赚钱机会库 + 可筛选资料库。
+
+核心原则：**第一性原理 + 对抗式审查**。每条资讯和机会都必须回答：真实机制是什么、谁受益、我承担什么风险、什么能独立验证、最可能失败在哪里。
+
+## 本地运行
+
+```bash
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+打开 `http://127.0.0.1:4321/`。
 
-## 🚀 Project Structure
+## 构建和验收
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+npm run build
+npm test
+npm run preview
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 内容维护
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- 每日资讯：`src/content/daily/*.mdx`
+- 赚钱机会：`src/content/opportunities/*.mdx`
+- 资料库：`src/content/library/*.mdx`
+- AI 工具目录：`src/data/tools.json`
 
-Any static assets, like images, can be placed in the `public/` directory.
+## 公开访问
 
-## 🧞 Commands
+推到 GitHub 后，在仓库开启 `Settings -> Pages -> Build and deployment -> GitHub Actions`。
 
-All commands are run from the root of the project, from a terminal:
+默认外部访问地址：`https://你的用户名.github.io/仓库名/`。
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+如果仓库名是 `你的用户名.github.io`，把 workflow 里的 `ASTRO_BASE` 改成 `/`。
