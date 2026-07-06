@@ -62,12 +62,12 @@ const endpoint = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
       if (!target) return;
       const label = target.textContent.trim().slice(0, 80);
       const href = target.href || '';
-      const action = target.dataset.copy ? 'copy_prompt'
+      const action = target.dataset.copy ? (target.dataset.copyKind || 'copy_prompt')
         : target.dataset.save ? 'save_item'
           : target.dataset.read ? 'read_item'
             : href ? 'open_link'
               : 'button';
-      send('click', { action, label, href, id: target.dataset.save || target.dataset.read || '' });
+      send('click', { action, label, href, id: target.dataset.save || target.dataset.read || target.dataset.copyKind || '' });
     });
   })();
 </script>

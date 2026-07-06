@@ -44,7 +44,7 @@ async function runViewport(browser, viewport) {
   const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
   await page.close();
 
-  if (!title.includes('AI 热点')) throw new Error(`${viewport.name}: unexpected hero title ${title}`);
+  if (!title.includes('每日 AI 资讯')) throw new Error(`${viewport.name}: unexpected hero title ${title}`);
   if (visible < 1) throw new Error(`${viewport.name}: search did not leave any visible cards`);
   if (savedCount < 1) throw new Error(`${viewport.name}: saved list did not update`);
   if (readPressed !== 'true') throw new Error(`${viewport.name}: read state did not update`);

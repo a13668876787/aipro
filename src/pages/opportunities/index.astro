@@ -39,13 +39,15 @@ const difficulties = ['全部', ...new Set(opportunities.map((item) => item.data
           <p>{item.data.monetizationPath}</p>
           <div class="review-grid">
             <article><strong>机制</strong><p>{item.data.review.mechanism}</p></article>
-            <article><strong>失败点</strong><p>{item.data.review.failureMode}</p></article>
+            <article><strong>怎么拍</strong><p>{item.data.shootPlan}</p></article>
+            <article><strong>引到哪里</strong><p>{item.data.trafficDestination}</p></article>
+            <article><strong>评论区钩子</strong><p>{item.data.commentHook}</p></article>
           </div>
           <div class="card-actions">
             <a class="primary" href={`${import.meta.env.BASE_URL}opportunities/${item.id}/`}>详情</a>
             <button data-save={item.id}>收藏</button>
             <button data-read={item.id}>标为已读</button>
-            <button data-copy={`请把这个 AI 机会改成 60 秒短视频选题：${item.data.title}。变现路径：${item.data.monetizationPath}。风险：${item.data.review.userRisk}。输出开头、口播、CTA 和对抗式审查。`}>复制选题</button>
+            <button data-copy={`【机会】${item.data.title}\n【怎么拍】${item.data.shootPlan}\n【评论区CTA】${item.data.commentHook}\n【私信回复】${item.data.dmReply}\n【交付物】${item.data.deliverable}\n【风险】${item.data.review.userRisk}`} data-copy-kind="copy_script">复制短视频玩法</button>
           </div>
         </article>
       ))}

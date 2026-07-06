@@ -63,7 +63,7 @@
       try {
         await navigator.clipboard.writeText(text);
         button.textContent = '已复制';
-        window.aiRadarTrack?.('copy_prompt', { label: button.textContent, text: text.slice(0, 120) });
+        window.aiRadarTrack?.(button.dataset.copyKind || 'copy_prompt', { label: button.textContent, text: text.slice(0, 120) });
       } catch (_error) {
         window.prompt('复制这段内容：', text);
       }

@@ -23,6 +23,11 @@ test('built site keeps the required public sections', () => {
   assert.match(index, /对抗式审查/);
   assert.match(index, /工具目录/);
   assert.match(index, /机会库/);
+  assert.match(index, /每日 AI 资讯/);
+  assert.match(index, /今日内容从哪来/);
+  assert.match(index, /复制完整脚本/);
+  assert.match(index, /data-copy-kind="copy_script"/);
+  assert.match(index, /data-copy-kind="copy_cta"/);
   assert.match(index, /data-search-input/);
   assert.match(index, /data-saved-list/);
 });

@@ -24,6 +24,15 @@ const { Content } = await render(post);
       <article><strong>失败点</strong><p>{post.data.review.failureMode}</p></article>
       <article><strong>短视频角度</strong><p>{post.data.videoAngle}</p></article>
     </section>
+    <h2>短视频引流玩法</h2>
+    <section class="review-grid">
+      <article><strong>怎么拍</strong><p>{post.data.shootPlan}</p></article>
+      <article><strong>拍完引到哪里</strong><p>{post.data.trafficDestination}</p></article>
+      <article><strong>评论区怎么留钩子</strong><p>{post.data.commentHook}</p></article>
+      <article><strong>私信怎么回复</strong><p>{post.data.dmReply}</p></article>
+      <article><strong>能卖什么交付物</strong><p>{post.data.deliverable}</p></article>
+      <article><strong>风险提醒</strong><p>{post.data.review.userRisk}</p></article>
+    </section>
     <h2>7 天验证步骤</h2>
     <ol>
       {post.data.sevenDayTest.map((step) => <li>{step}</li>)}

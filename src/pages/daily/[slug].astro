@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterScript from '../../components/FilterScript.astro';
 import { formatDate } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -10,6 +11,24 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const copyScript = `【选题标题】${post.data.videoTitle}
+
+【开头3秒】${post.data.hook3s}
+
+【60秒口播】${post.data.script60s}
+
+【画面建议】
+${post.data.shotList.map((shot, index) => `${index + 1}. ${shot}`).join('\n')}
+
+【评论区CTA】${post.data.commentCTA}
+
+【私信回复】${post.data.dmReply}
+
+【可卖产品/服务】${post.data.sellableOffer}
+
+【风险提醒】${post.data.risk}
+
+【来源】${post.data.sourceName}：${post.data.sourceUrl}`;
 ---
 
 <BaseLayout title={`${post.data.title} · 每日 AI 资讯`}>
@@ -17,15 +36,63 @@ const { Content } = await render(post);
     <span class="eyebrow">{formatDate(post.data.date)} · {post.data.category} · {post.data.impact}影响</span>
     <h1>{post.data.title}</h1>
     <p>{post.data.summary}</p>
+    <div class="hero-actions">
+      <button class="button primary" data-copy={copyScript} data-copy-kind="copy_script">复制完整脚本</button>
+      <button class="button" data-copy={post.data.commentCTA} data-copy-kind="copy_cta">复制评论区 CTA</button>
+      <a class="button" href={post.data.sourceUrl} target="_blank" rel="noopener">打开来源</a>
+    </div>
+    <h2>这条资讯怎么拍成短视频</h2>
+    <section class="script-detail">
+      <article>
+        <span class="section-kicker">Hook</span>
+        <h2>开头 3 秒</h2>
+        <p>{post.data.hook3s}</p>
+      </article>
+      <article>
+        <span class="section-kicker">Script</span>
+        <h2>30-60 秒口播稿</h2>
+        <p>{post.data.script60s}</p>
+      </article>
+      <article>
+        <span class="section-kicker">Shots</span>
+        <h2>画面 / 分镜建议</h2>
+        <ol>{post.data.shotList.map((shot) => <li>{shot}</li>)}</ol>
+      </article>
+      <article>
+        <span class="section-kicker">CTA</span>
+        <h2>评论区引流</h2>
+        <p>{post.data.commentCTA}</p>
+      </article>
+      <article>
+        <span class="section-kicker">DM</span>
+        <h2>私信回复话术</h2>
+        <p>{post.data.dmReply}</p>
+      </article>
+      <article>
+        <span class="section-kicker">Offer</span>
+        <h2>可卖产品 / 服务</h2>
+        <p>{post.data.sellableOffer}</p>
+      </article>
+    </section>
     <section class="review-grid">
       <article><strong>真实机制</strong><p>{post.data.review.mechanism}</p></article>
       <article><strong>谁受益</strong><p>{post.data.review.whoBenefits}</p></article>
       <article><strong>你承担的风险</strong><p>{post.data.review.userRisk}</p></article>
-      <article><strong>可验证证据</strong><p>{post.data.review.verification}</p></article>
+      <article><strong>来源核验</strong><p>{post.data.verification}</p></article>
       <article><strong>失败点</strong><p>{post.data.review.failureMode}</p></article>
       <article><strong>今天能做</strong><p>{post.data.action}</p></article>
     </section>
-    <p><a class="button primary" href={post.data.sourceUrl} target="_blank" rel="noopener">打开来源：{post.data.sourceName}</a></p>
+    <h2>7 天变现动作</h2>
+    <ol>
+      <li>今天先拍这一条，不追求完美，重点验证标题和评论区反馈。</li>
+      <li>把评论里高频问题整理成一个免费清单。</li>
+      <li>用私信话术收集 3 个真实需求，不急着成交。</li>
+      <li>把需求拆成一个最小交付物：模板、报告、诊断或小工具。</li>
+      <li>做一条复盘视频，展示你如何验证来源和风险。</li>
+      <li>给愿意深入的人发一个低价试用或免费诊断入口。</li>
+      <li>只根据真实咨询和收藏数据决定是否继续做这个方向。</li>
+    </ol>
     <Content />
   </article>
+  <FilterScript />
 </BaseLayout>
